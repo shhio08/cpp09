@@ -19,13 +19,9 @@ private:
     
     // vectorを使用したFord-Johnsonソート
     void fordJohnsonSortVector(std::vector<int>& vec, int begin, int end);
-    void insertSortedVector(std::vector<int>& vec, int begin, int end);
-    void mergeSortedVector(std::vector<int>& vec, int begin, int mid, int end);
     
     // dequeを使用したFord-Johnsonソート
     void fordJohnsonSortDeque(std::deque<int>& deq, int begin, int end);
-    void insertSortedDeque(std::deque<int>& deq, int begin, int end);
-    void mergeSortedDeque(std::deque<int>& deq, int begin, int mid, int end);
 
 public:
     PmergeMe();
