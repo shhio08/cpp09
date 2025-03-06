@@ -23,7 +23,7 @@ BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &other) {
 
 // DBの読み込み
 void BitcoinExchange::loadDatabase(const std::string &filename) {
-	std::ifstream file(filename);
+	std::ifstream file(filename.c_str());
 	if (!file.is_open())
 	{
 		std::cerr << "Error: Could not open file." << std::endl;
@@ -62,7 +62,7 @@ double BitcoinExchange::getRate(const std::string &date) const {
 }
 
 void BitcoinExchange::processInputFile(const std::string &filename) const {
-	std::ifstream file(filename);
+	std::ifstream file(filename.c_str());
 	if (!file.is_open())
 	{
 		std::cerr << "Error: Could not open file." << std::endl;
@@ -80,8 +80,8 @@ void BitcoinExchange::processInputFile(const std::string &filename) const {
 		{
 			try
 			{
-				date.erase(remove(date.begin(), date.end(), ' '), date.end());
-				valueStr.erase(remove(valueStr.begin(), valueStr.end(), ' '), valueStr.end());
+				date.erase(std::remove(date.begin(), date.end(), ' '), date.end());
+				valueStr.erase(std::remove(valueStr.begin(), valueStr.end(), ' '), valueStr.end());
 				
 				// 数値に不正な文字が含まれているかチェック
 				for (size_t i = 0; i < valueStr.size(); ++i) {
@@ -90,7 +90,9 @@ void BitcoinExchange::processInputFile(const std::string &filename) const {
 					}
 				}
 				
-				double value = std::stod(valueStr);
+				std::stringstream ss(valueStr);
+				double value;
+				ss >> value;
 
 				if (validateRate(value) == false)
 				{
@@ -124,9 +126,11 @@ bool BitcoinExchange::validateDate(const std::string &date) const {
 	if (date[4] != '-' || date[7] != '-')
 		return false;
 
-	int year = std::stoi(date.substr(0, 4));
-	int month = std::stoi(date.substr(5, 2));
-	int day = std::stoi(date.substr(8, 2));
+	std::stringstream ss_year(date.substr(0, 4)), ss_month(date.substr(5, 2)), ss_day(date.substr(8, 2));
+	int year, month, day;
+	ss_year >> year;
+	ss_month >> month;
+	ss_day >> day;
 
 	if (year < 0)
 		return false;
