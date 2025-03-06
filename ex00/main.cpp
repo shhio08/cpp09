@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
 
     try {
         // データベースのファイルパスを指定してBitcoinExchangeインスタンスを作成
-        BitcoinExchange exchange("database.csv");
+        BitcoinExchange exchange("data.csv");
 
         // 入力ファイルを処理
         exchange.processInputFile(argv[1]);

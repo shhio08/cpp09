@@ -81,6 +81,15 @@ void BitcoinExchange::processInputFile(const std::string &filename) const {
 			try
 			{
 				date.erase(remove(date.begin(), date.end(), ' '), date.end());
+				valueStr.erase(remove(valueStr.begin(), valueStr.end(), ' '), valueStr.end());
+				
+				// 数値に不正な文字が含まれているかチェック
+				for (size_t i = 0; i < valueStr.size(); ++i) {
+					if (!(isdigit(valueStr[i]) || valueStr[i] == '.' || (i == 0 && valueStr[i] == '-'))) {
+						throw std::invalid_argument("Invalid characters in value");
+					}
+				}
+				
 				double value = std::stod(valueStr);
 
 				if (validateRate(value) == false)
