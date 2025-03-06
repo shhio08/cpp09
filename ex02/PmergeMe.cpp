@@ -79,39 +79,45 @@ void PmergeMe::fordJohnsonSortVector(std::vector<int>& vec, int begin, int end) 
 }
 
 void PmergeMe::insertSortedVector(std::vector<int>& vec, int begin, int end) {
-    // 最初のペアの小さい方（主塊の最初の要素）はすでに正しい位置にある
+    if (end - begin <= 1) return;
+    
+    // メインチェーンとペンド要素の配列を作成
     std::vector<int> mainChain;
     std::vector<int> pendElements;
     
-    // ペアの大きい要素を主塊に、小さい要素を保留要素に追加
+    // 最初にペアになっている要素を整理
     for (int i = begin; i < end; i += 2) {
         if (i + 1 < end) {
-            mainChain.push_back(vec[i + 1]);  // 大きい方
-            pendElements.push_back(vec[i]);   // 小さい方
+            mainChain.push_back(vec[i + 1]);  // 大きい方の要素
+            pendElements.push_back(vec[i]);   // 小さい方の要素
         } else {
-            // 奇数の場合、最後の要素を主塊に追加
-            mainChain.push_back(vec[i]);
+            // 奇数個の場合、最後の要素を処理
+            pendElements.push_back(vec[i]);
         }
     }
     
-    // ジャコビアン数列を使用して挿入順序を決定（簡略化のため、定位置挿入を使用）
-    std::vector<int> sortedSequence;
-    sortedSequence.push_back(pendElements[0]);  // 最初の要素
+    // 結果の配列を初期化
+    std::vector<int> result;
     
+    // 最初のペンド要素をメインチェーンの前に挿入
+    if (!pendElements.empty()) {
+        result.push_back(pendElements[0]);
+    }
+    
+    // 残りのペンド要素を二分探索して正しい位置に挿入
     for (size_t i = 0; i < mainChain.size(); ++i) {
-        sortedSequence.push_back(mainChain[i]);
+        result.push_back(mainChain[i]);
         
         if (i + 1 < pendElements.size()) {
-            // 保留要素を二分探索で適切な位置に挿入
             int element = pendElements[i + 1];
-            std::vector<int>::iterator pos = std::lower_bound(sortedSequence.begin(), sortedSequence.end(), element);
-            sortedSequence.insert(pos, element);
+            std::vector<int>::iterator pos = std::lower_bound(result.begin(), result.end(), element);
+            result.insert(pos, element);
         }
     }
     
     // 結果を元の配列にコピー
-    for (size_t i = 0; i < sortedSequence.size(); ++i) {
-        vec[begin + i] = sortedSequence[i];
+    for (size_t i = 0; i < result.size(); ++i) {
+        vec[begin + i] = result[i];
     }
 }
 
@@ -175,39 +181,45 @@ void PmergeMe::fordJohnsonSortDeque(std::deque<int>& deq, int begin, int end) {
 }
 
 void PmergeMe::insertSortedDeque(std::deque<int>& deq, int begin, int end) {
-    // 最初のペアの小さい方（主塊の最初の要素）はすでに正しい位置にある
+    if (end - begin <= 1) return;
+    
+    // メインチェーンとペンド要素の配列を作成
     std::deque<int> mainChain;
     std::deque<int> pendElements;
     
-    // ペアの大きい要素を主塊に、小さい要素を保留要素に追加
+    // 最初にペアになっている要素を整理
     for (int i = begin; i < end; i += 2) {
         if (i + 1 < end) {
-            mainChain.push_back(deq[i + 1]);  // 大きい方
-            pendElements.push_back(deq[i]);   // 小さい方
+            mainChain.push_back(deq[i + 1]);  // 大きい方の要素
+            pendElements.push_back(deq[i]);   // 小さい方の要素
         } else {
-            // 奇数の場合、最後の要素を主塊に追加
-            mainChain.push_back(deq[i]);
+            // 奇数個の場合、最後の要素を処理
+            pendElements.push_back(deq[i]);
         }
     }
     
-    // ジャコビアン数列を使用して挿入順序を決定（簡略化のため、定位置挿入を使用）
-    std::deque<int> sortedSequence;
-    sortedSequence.push_back(pendElements[0]);  // 最初の要素
+    // 結果の配列を初期化
+    std::deque<int> result;
     
+    // 最初のペンド要素をメインチェーンの前に挿入
+    if (!pendElements.empty()) {
+        result.push_back(pendElements[0]);
+    }
+    
+    // 残りのペンド要素を二分探索して正しい位置に挿入
     for (size_t i = 0; i < mainChain.size(); ++i) {
-        sortedSequence.push_back(mainChain[i]);
+        result.push_back(mainChain[i]);
         
         if (i + 1 < pendElements.size()) {
-            // 保留要素を二分探索で適切な位置に挿入
             int element = pendElements[i + 1];
-            std::deque<int>::iterator pos = std::lower_bound(sortedSequence.begin(), sortedSequence.end(), element);
-            sortedSequence.insert(pos, element);
+            std::deque<int>::iterator pos = std::lower_bound(result.begin(), result.end(), element);
+            result.insert(pos, element);
         }
     }
     
     // 結果を元の配列にコピー
-    for (size_t i = 0; i < sortedSequence.size(); ++i) {
-        deq[begin + i] = sortedSequence[i];
+    for (size_t i = 0; i < result.size(); ++i) {
+        deq[begin + i] = result[i];
     }
 }
 
@@ -250,8 +262,8 @@ void PmergeMe::sort() {
     clock_t deqEnd = clock();
     
     // 時間を計算（マイクロ秒単位）
-    double vecTime = static_cast<double>(vecEnd - vecStart) / CLOCKS_PER_SEC * 1000000;
-    double deqTime = static_cast<double>(deqEnd - deqStart) / CLOCKS_PER_SEC * 1000000;
+    double vecTime = static_cast<double>(vecEnd - vecStart) / CLOCKS_PER_SEC * 1000000.0;
+    double deqTime = static_cast<double>(deqEnd - deqStart) / CLOCKS_PER_SEC * 1000000.0;
     
     // 結果表示
     displayResults(vecTime, deqTime);
