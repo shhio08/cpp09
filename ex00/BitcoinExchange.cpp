@@ -137,8 +137,11 @@ bool BitcoinExchange::validateDate(const std::string &date) const {
 	if (month < 1 || month > 12)
 		return false;
 
+	// 閏年の判定を追加
+	bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+	
 	static const int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-	if (day < 1 || day > daysInMonth[month - 1])
+	if (day < 1 || (month == 2 && isLeapYear ? day > 29 : day > daysInMonth[month - 1]))
 		return false;
 
 	return true;
