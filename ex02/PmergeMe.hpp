@@ -16,7 +16,7 @@ private:
     std::vector<int> _vec;
     std::deque<int> _deq;
     std::vector<int> _originalSequence;
-    
+
     // vectorを使用したFord-Johnsonソート
     void fordJohnsonSortVector(std::vector<int>& vec, int begin, int end);
     
@@ -41,4 +41,11 @@ public:
     // シーケンスの表示
     void printOriginalSequence();
     void printSortedSequence();
+
+    // ヤコブスタール数列を生成する関数
+    std::vector<size_t> generateJacobsthal(size_t n);
+
+    // 挿入順序を生成する関数
+    std::vector<size_t> getInsertionOrder(size_t size);
+
 };

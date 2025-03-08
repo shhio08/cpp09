@@ -93,17 +93,44 @@ void PmergeMe::fordJohnsonSortVector(std::vector<int>& vec, int begin, int end) 
                 result.insert(result.begin() + 1, pendElements[0]);
             }
         } else {
-            // 最初のペンド要素は必ずメインチェーンの最小値より小さいので、先頭に挿入
-            result.insert(result.begin(), pendElements[0]);
-        }
-        // 残りのペンド要素を挿入（探索範囲を2倍ずつ増やす）
-        size_t searchLimit = 2;
-        for (size_t i = 1; i < pendElements.size(); ++i) {
-            std::vector<int>::iterator searchEnd = result.begin() + std::min(searchLimit, result.size());
-            std::vector<int>::iterator pos = 
-                std::lower_bound(result.begin(), searchEnd, pendElements[i]);
-            result.insert(pos, pendElements[i]);
-            searchLimit *= 2;
+            // ヤコブスタール数列に基づいて挿入順序を決定
+            std::vector<size_t> jacobsthalIndices;
+            jacobsthalIndices.push_back(0); // 最初の要素は常に先頭に挿入
+            
+            // ヤコブスタール数列を計算し、有効なインデックスを保存
+            std::vector<size_t> jacobsthal;
+            jacobsthal.push_back(0);
+            jacobsthal.push_back(1);
+            size_t i = 2;
+            while (jacobsthal.back() < pendElements.size()) {
+                jacobsthal.push_back(jacobsthal[i-1] + 2 * jacobsthal[i-2]);
+                i++;
+            }
+            
+            // ヤコブスタール数列に基づいて挿入順序を生成
+            for (size_t j = 1; j < jacobsthal.size(); j++) {
+                size_t curr = jacobsthal[j];
+                size_t prev = jacobsthal[j-1];
+                
+                if (curr >= pendElements.size()) {
+                    curr = pendElements.size() - 1;
+                }
+                
+                // 現在のヤコブスタール数から前のヤコブスタール数までを逆順に追加
+                for (size_t k = curr; k > prev; k--) {
+                    if (k < pendElements.size()) {
+                        jacobsthalIndices.push_back(k);
+                    }
+                }
+            }
+            
+            // ヤコブスタール順序に従ってペンド要素を挿入
+            for (size_t i = 0; i < jacobsthalIndices.size(); i++) {
+                size_t idx = jacobsthalIndices[i];
+                std::vector<int>::iterator pos = 
+                    std::lower_bound(result.begin(), result.end(), pendElements[idx]);
+                result.insert(pos, pendElements[idx]);
+            }
         }
     }
     
@@ -158,17 +185,44 @@ void PmergeMe::fordJohnsonSortDeque(std::deque<int>& deq, int begin, int end) {
                 result.insert(result.begin() + 1, pendElements[0]);
             }
         } else {
-            // 最初のペンド要素は必ずメインチェーンの最小値より小さいので、先頭に挿入
-            result.insert(result.begin(), pendElements[0]);
-        }
-        // 残りのペンド要素を挿入（探索範囲を2倍ずつ増やす）
-        size_t searchLimit = 2;
-        for (size_t i = 1; i < pendElements.size(); ++i) {
-            std::deque<int>::iterator searchEnd = result.begin() + std::min(searchLimit, result.size());
-            std::deque<int>::iterator pos = 
-                std::lower_bound(result.begin(), searchEnd, pendElements[i]);
-            result.insert(pos, pendElements[i]);
-            searchLimit *= 2;
+            // ヤコブスタール数列に基づいて挿入順序を決定
+            std::vector<size_t> jacobsthalIndices;
+            jacobsthalIndices.push_back(0); // 最初の要素は常に先頭に挿入
+            
+            // ヤコブスタール数列を計算し、有効なインデックスを保存
+            std::vector<size_t> jacobsthal;
+            jacobsthal.push_back(0);
+            jacobsthal.push_back(1);
+            size_t i = 2;
+            while (jacobsthal.back() < pendElements.size()) {
+                jacobsthal.push_back(jacobsthal[i-1] + 2 * jacobsthal[i-2]);
+                i++;
+            }
+            
+            // ヤコブスタール数列に基づいて挿入順序を生成
+            for (size_t j = 1; j < jacobsthal.size(); j++) {
+                size_t curr = jacobsthal[j];
+                size_t prev = jacobsthal[j-1];
+                
+                if (curr >= pendElements.size()) {
+                    curr = pendElements.size() - 1;
+                }
+                
+                // 現在のヤコブスタール数から前のヤコブスタール数までを逆順に追加
+                for (size_t k = curr; k > prev; k--) {
+                    if (k < pendElements.size()) {
+                        jacobsthalIndices.push_back(k);
+                    }
+                }
+            }
+            
+            // ヤコブスタール順序に従ってペンド要素を挿入
+            for (size_t i = 0; i < jacobsthalIndices.size(); i++) {
+                size_t idx = jacobsthalIndices[i];
+                std::deque<int>::iterator pos = 
+                    std::lower_bound(result.begin(), result.end(), pendElements[idx]);
+                result.insert(pos, pendElements[idx]);
+            }
         }
     }
     
