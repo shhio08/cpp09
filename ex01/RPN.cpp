@@ -23,6 +23,8 @@ bool RPN::processRpn(const char *arg) {
 	std::string tokens = std::string(arg);
 	for (std::string::iterator it = tokens.begin(); it != tokens.end(); ++it) {
 		skipSpaces(it);
+		if (it == tokens.end())
+			break;
 		if (std::isdigit(*it))
 			this->nums.push(*it - '0');
 		else if (isOperator(it))
@@ -72,7 +74,7 @@ bool RPN::calculate(std::string::iterator& it) {
 		nums.push(num2 * num1);
 		break;
 	case '/':
-		if (num2 == 0)
+		if (num1 == 0)
 			throw std::runtime_error("Division by zero");
 		nums.push(num2 / num1);
 		break;

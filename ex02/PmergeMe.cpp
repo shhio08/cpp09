@@ -51,20 +51,6 @@ bool PmergeMe::parseArgs(int argc, char** argv) {
 void PmergeMe::fordJohnsonSortVector(std::vector<int>& vec, int begin, int end) {
     if (end - begin <= 1) return;
     
-    // 要素数が少ない場合は挿入ソートを使用
-    if (end - begin <= 16) {
-        for (int i = begin + 1; i < end; ++i) {
-            int key = vec[i];
-            int j = i - 1;
-            while (j >= begin && vec[j] > key) {
-                vec[j + 1] = vec[j];
-                --j;
-            }
-            vec[j + 1] = key;
-        }
-        return;
-    }
-    
     std::vector<std::pair<int, int> > pairs;
     
     // ペアを作成（大きい方を first, 小さい方を second に）
@@ -76,44 +62,49 @@ void PmergeMe::fordJohnsonSortVector(std::vector<int>& vec, int begin, int end) 
         else
             pairs.push_back(std::make_pair(b, a));
     }
-    
-    // 奇数個の場合、最後の要素を保存
-    int lastElement = -1;
-    if ((end - begin) % 2 != 0) {
-        lastElement = vec[end - 1];
-    }
-    
     // メインチェーンとペンド要素を分離
     std::vector<int> mainChain;
     std::vector<int> pendElements;
     
+    if ((end - begin) % 2 != 0) {
+        mainChain.push_back(vec[end - 1]);
+    }
     for (size_t i = 0; i < pairs.size(); i++) {
         mainChain.push_back(pairs[i].first);     // 大きい方をメインチェーンに
         pendElements.push_back(pairs[i].second);  // 小さい方をペンド要素に
     }
-    
-    // メインチェーンを再帰的にソート
-    fordJohnsonSortVector(mainChain, 0, mainChain.size());
+
+    // メインチェーンを再帰的にソート（要素が1つになるまで）
+    if (mainChain.size() > 1) {
+        fordJohnsonSortVector(mainChain, 0, mainChain.size());
+    }
     
     // 結果を一時的な配列に格納
     std::vector<int> result;
     result.reserve(end - begin);
-    
-    // メインチェーンの要素を全て追加
     result = mainChain;
     
-    // ペンド要素を二分探索で適切な位置に挿入
-    for (size_t i = 0; i < pendElements.size(); ++i) {
-        std::vector<int>::iterator pos = 
-            std::lower_bound(result.begin(), result.end(), pendElements[i]);
-        result.insert(pos, pendElements[i]);
-    }
-    
-    // 奇数個の場合、最後の要素を適切な位置に挿入
-    if (lastElement != -1) {
-        std::vector<int>::iterator pos = 
-            std::lower_bound(result.begin(), result.end(), lastElement);
-        result.insert(pos, lastElement);
+    // ペンド要素を最適化された順序で挿入
+    if (!pendElements.empty()) {
+        if (pendElements.size() == 1) {
+            if (pendElements[0] < result[0]) {
+                result.insert(result.begin(), pendElements[0]);
+            } else {
+                result.insert(result.begin() + 1, pendElements[0]);
+            }
+        } else {
+            // 最初のペンド要素は必ずメインチェーンの最小値より小さいので、先頭に挿入
+            result.insert(result.begin(), pendElements[0]);
+        }
+        // 残りのペンド要素を挿入（探索範囲を2倍ずつ増やす）
+        size_t searchLimit = 2;
+        for (size_t i = 1; i < pendElements.size(); ++i) {
+            std::vector<int>::iterator searchEnd = result.begin() + std::min(searchLimit, result.size());
+            std::vector<int>::iterator pos = 
+                std::lower_bound(result.begin(), searchEnd, pendElements[i]);
+            result.insert(pos, pendElements[i]);
+            searchLimit *= 2;
+        }
     }
     
     // 結果を元の配列にコピー
@@ -124,20 +115,6 @@ void PmergeMe::fordJohnsonSortVector(std::vector<int>& vec, int begin, int end) 
 
 void PmergeMe::fordJohnsonSortDeque(std::deque<int>& deq, int begin, int end) {
     if (end - begin <= 1) return;
-    
-    // 要素数が少ない場合は挿入ソートを使用
-    if (end - begin <= 16) {
-        for (int i = begin + 1; i < end; ++i) {
-            int key = deq[i];
-            int j = i - 1;
-            while (j >= begin && deq[j] > key) {
-                deq[j + 1] = deq[j];
-                --j;
-            }
-            deq[j + 1] = key;
-        }
-        return;
-    }
     
     std::deque<std::pair<int, int> > pairs;
     
@@ -150,49 +127,53 @@ void PmergeMe::fordJohnsonSortDeque(std::deque<int>& deq, int begin, int end) {
         else
             pairs.push_back(std::make_pair(b, a));
     }
-    
-    // 奇数個の場合、最後の要素を保存
-    int lastElement = -1;
-    if ((end - begin) % 2 != 0) {
-        lastElement = deq[end - 1];
-    }
-    
+
     // メインチェーンとペンド要素を分離
     std::deque<int> mainChain;
     std::deque<int> pendElements;
     
+    if ((end - begin) % 2 != 0) {
+        mainChain.push_back(deq[end - 1]);
+    }
     for (size_t i = 0; i < pairs.size(); i++) {
         mainChain.push_back(pairs[i].first);     // 大きい方をメインチェーンに
         pendElements.push_back(pairs[i].second);  // 小さい方をペンド要素に
     }
-    
+
     // メインチェーンを再帰的にソート
-    fordJohnsonSortDeque(mainChain, 0, mainChain.size());
+    if (mainChain.size() > 1) {
+        fordJohnsonSortDeque(mainChain, 0, mainChain.size());
+    }
     
     // 結果を一時的な配列に格納
     std::deque<int> result;
-    
-    // メインチェーンの要素を全て追加
     result = mainChain;
     
-    // ペンド要素を二分探索で適切な位置に挿入
-    for (size_t i = 0; i < pendElements.size(); ++i) {
-        std::deque<int>::iterator pos = 
-            std::lower_bound(result.begin(), result.end(), pendElements[i]);
-        result.insert(pos, pendElements[i]);
-    }
-    
-    // 奇数個の場合、最後の要素を適切な位置に挿入
-    if (lastElement != -1) {
-        std::deque<int>::iterator pos = 
-            std::lower_bound(result.begin(), result.end(), lastElement);
-        result.insert(pos, lastElement);
+    // ペンド要素を最適化された順序で挿入
+    if (!pendElements.empty()) {
+        if (pendElements.size() == 1) {
+            if (pendElements[0] < result[0]) {
+                result.insert(result.begin(), pendElements[0]);
+            } else {
+                result.insert(result.begin() + 1, pendElements[0]);
+            }
+        } else {
+            // 最初のペンド要素は必ずメインチェーンの最小値より小さいので、先頭に挿入
+            result.insert(result.begin(), pendElements[0]);
+        }
+        // 残りのペンド要素を挿入（探索範囲を2倍ずつ増やす）
+        size_t searchLimit = 2;
+        for (size_t i = 1; i < pendElements.size(); ++i) {
+            std::deque<int>::iterator searchEnd = result.begin() + std::min(searchLimit, result.size());
+            std::deque<int>::iterator pos = 
+                std::lower_bound(result.begin(), searchEnd, pendElements[i]);
+            result.insert(pos, pendElements[i]);
+            searchLimit *= 2;
+        }
     }
     
     // 結果を元の配列にコピー
-    for (size_t i = 0; i < result.size(); i++) {
-        deq[begin + i] = result[i];
-    }
+    std::copy(result.begin(), result.end(), deq.begin() + begin);
 }
 
 void PmergeMe::sort() {
